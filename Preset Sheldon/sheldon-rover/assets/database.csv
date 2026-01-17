@@ -1,0 +1,28 @@
+id,category,intensity,index,serial_command,audio_filename,transcript,file_exists
+BOOT_0_0,BOOT,0,0,100,boot_0_0.wav,Systems online. Please do not touch anything unnecessarily.,FALSE
+BOOT_1_0,BOOT,1,0,110,boot_1_0.wav,Initialization complete. Human interference is anticipated.,FALSE
+BOOT_2_0,BOOT,2,0,120,boot_2_0.wav,Boot complete. I am already disappointed in your methodology.,FALSE
+MOVE_START_0_0,MOVE_START,0,0,200,move_start_0_0.wav,Commencing motion. Try not to introduce variables.,FALSE
+MOVE_START_1_0,MOVE_START,1,0,210,move_start_1_0.wav,Initiating traversal. Your confidence is not evidence.,FALSE
+MOVE_START_2_0,MOVE_START,2,0,220,move_start_2_0.wav,"Beginning movement. Statistically, you will ruin this.",FALSE
+COLLISION_0_0,COLLISION,0,0,300,collision_0_0.wav,Unexpected contact. Revising model.,FALSE
+COLLISION_0_1,COLLISION,0,1,301,collision_0_1.wav,Collision detected. Suboptimal.,FALSE
+COLLISION_1_0,COLLISION,1,0,310,collision_1_0.wav,That obstacle was predictable. Your planning was not.,FALSE
+COLLISION_1_1,COLLISION,1,1,311,collision_1_1.wav,Impact occurred due to improper environmental assumptions.,FALSE
+COLLISION_2_0,COLLISION,2,0,320,collision_2_0.wav,This is why we cannot have nice experiments.,FALSE
+COLLISION_2_1,COLLISION,2,1,321,collision_2_1.wav,"Catastrophic error. Also, I was correct to distrust you.",FALSE
+STUCK_0_0,STUCK,0,0,400,stuck_0_0.wav,I appear to be immobilized. This is... inconvenient.,FALSE
+STUCK_1_0,STUCK,1,0,410,stuck_1_0.wav,I am stuck. The environment is non-compliant.,FALSE
+STUCK_2_0,STUCK,2,0,420,stuck_2_0.wav,I refuse to proceed until the laws of physics are respected.,FALSE
+IDLE_TOO_LONG_0_0,IDLE_TOO_LONG,0,0,500,idle_too_long_0_0.wav,I am waiting. Efficiently.,FALSE
+IDLE_TOO_LONG_1_0,IDLE_TOO_LONG,1,0,510,idle_too_long_1_0.wav,The delay is unnecessary. Proceed.,FALSE
+IDLE_TOO_LONG_2_0,IDLE_TOO_LONG,2,0,520,idle_too_long_2_0.wav,"If your plan involves hesitation, it is not a plan.",FALSE
+RESET_0_0,RESET,0,0,600,reset_0_0.wav,Reset acknowledged. Please be more careful.,FALSE
+RESET_1_0,RESET,1,0,610,reset_1_0.wav,Resetting. Again. Predictable.,FALSE
+RESET_2_0,RESET,2,0,620,reset_2_0.wav,Resetting because humans mistake repetition for progress.,FALSE
+MOVE_STOP_0_0,MOVE_STOP,0,0,700,move_stop_0_0.wav,Stopping. As planned.,FALSE
+MOVE_STOP_1_0,MOVE_STOP,1,0,710,move_stop_1_0.wav,Stopping to prevent further errors.,FALSE
+MOVE_STOP_2_0,MOVE_STOP,2,0,720,move_stop_2_0.wav,Stopping because continuing would be irresponsible. Unlike you.,FALSE
+MODE_SWITCH_0_0,MODE_SWITCH,0,0,800,mode_switch_0_0.wav,Adjusting tolerance parameters.,FALSE
+MODE_SWITCH_1_0,MODE_SWITCH,1,0,810,mode_switch_1_0.wav,Switching mode. Try to keep up.,FALSE
+MODE_SWITCH_2_0,MODE_SWITCH,2,0,820,mode_switch_2_0.wav,Mode changed. Your incompetence remains constant.,FALSE

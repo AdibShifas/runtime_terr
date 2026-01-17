@@ -1,0 +1,33 @@
+{
+  "clips": {
+    "BOOT_0": "boot_low.mp3",
+    "BOOT_1": "boot_mid.mp3",
+    "BOOT_2": "boot_high.mp3",
+    "COLLISION_0_1": "collision_low_1.mp3",
+    "COLLISION_0_2": "collision_low_2.mp3",
+    "COLLISION_1_1": "collision_mid_1.mp3",
+    "COLLISION_1_2": "collision_mid_2.mp3",
+    "COLLISION_2_1": "collision_high_1.mp3",
+    "COLLISION_2_2": "collision_high_2.mp3",
+    "STUCK_0": "stuck_low.mp3",
+    "STUCK_1": "stuck_mid.mp3",
+    "STUCK_2": "stuck_high.mp3",
+    "RESET_0": "reset_low.mp3",
+    "RESET_1": "reset_mid.mp3",
+    "RESET_2": "reset_high.mp3",
+    "MOVE_START_0": "move_start_low.mp3",
+    "MOVE_START_1": "move_start_mid.mp3",
+    "MOVE_START_2": "move_start_high.mp3",
+    "MOVE_STOP_0": "move_stop_low.mp3",
+    "MOVE_STOP_1": "move_stop_mid.mp3",
+    "MOVE_STOP_2": "move_stop_high.mp3",
+    "MODE_SWITCH_0": "mode_switch_low.mp3",
+    "MODE_SWITCH_1": "mode_switch_mid.mp3",
+    "MODE_SWITCH_2": "mode_switch_high.mp3",
+    "IDLE_TOO_LONG_0": "idle_low.mp3",
+    "IDLE_TOO_LONG_1": "idle_mid.mp3",
+    "IDLE_TOO_LONG_2": "idle_high.mp3"
+  },
+  "fallback_tts": true,
+  "clips_directory": "audio/clips"
+}
