@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,14 +12,16 @@
             --bg-color: #0a0a0a;
             --panel-color: #1a1a1a;
             --text-color: #e0e0e0;
-            --accent-color: #00ff41; /* Cyberpunk Green */
+            --accent-color: #00ff41;
+            /* Cyberpunk Green */
             --danger-color: #ff3333;
             --knob-color: rgba(255, 255, 255, 0.2);
         }
 
         * {
             box-sizing: border-box;
-            touch-action: none; /* Critical for Joystick */
+            touch-action: none;
+            /* Critical for Joystick */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -97,8 +100,14 @@
             letter-spacing: 2px;
             text-transform: uppercase;
         }
-        .stick-label.left { left: 20%; }
-        .stick-label.right { right: 20%; }
+
+        .stick-label.left {
+            left: 20%;
+        }
+
+        .stick-label.right {
+            right: 20%;
+        }
 
         /* --- STOP BUTTON --- */
         #stop-btn {
@@ -161,7 +170,8 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
-            touch-action: manipulation; /* Allow tap */
+            touch-action: manipulation;
+            /* Allow tap */
         }
 
         button:active {
@@ -188,7 +198,8 @@
             border-radius: 8px;
             color: white;
             margin-bottom: 8px;
-            font-size: 16px; /* Prevents zoom on iPhone */
+            font-size: 16px;
+            /* Prevents zoom on iPhone */
         }
 
         select {
@@ -217,311 +228,364 @@
         }
     </style>
 </head>
+
 <body>
 
-<header>
-    <div style="font-weight:900; letter-spacing:-0.5px;">SHELDON<span style="color:var(--accent-color)">.ROVER</span></div>
-    <div id="status-indicator" class="status-pill">
-        <div class="status-dot"></div>
-        <span id="status-text">DISCONNECTED</span>
-    </div>
-</header>
+    <header>
+        <div style="font-weight:900; letter-spacing:-0.5px;">SHELDON<span
+                style="color:var(--accent-color)">.ROVER</span></div>
+        <div id="status-indicator" class="status-pill">
+            <div class="status-dot"></div>
+            <span id="status-text">DISCONNECTED</span>
+        </div>
+    </header>
 
-<div id="joystick-container">
-    <canvas id="joystick-canvas"></canvas>
-    <div class="stick-label left">Throttle</div>
-    <div class="stick-label right">Steer</div>
-    <button id="stop-btn" ontouchstart="sendStop()">STOP</button>
-</div>
-
-<div id="control-panel">
-    
-    <!-- Audio Presets -->
-    <h3>Audio / Personality</h3>
-    <div class="grid-2">
-        <button onclick="sendEvent('BOOT')">🔊 Boot Up</button>
-        <button onclick="sendEvent('COLLISION')">💥 Collision</button>
-        <button onclick="sendEvent('STUCK')">⚠️ Stuck</button>
-        <button onclick="sendEvent('IDLE_TOO_LONG')">💤 Bored</button>
+    <div id="joystick-container">
+        <canvas id="joystick-canvas"></canvas>
+        <div class="stick-label left">Throttle</div>
+        <div class="stick-label right">Steer</div>
+        <button id="stop-btn" ontouchstart="sendStop()">STOP</button>
     </div>
 
-    <!-- Custom Speech -->
-    <h3>Custom Voice</h3>
-    <input type="text" id="tts-input" placeholder="Enter description (e.g. 'Sarcastic hello')">
-    <button class="action" style="width:100%" onclick="sendCustomTTS()">Generative Speak</button>
+    <div id="control-panel">
 
-    <!-- Terminal -->
-    <div id="terminal">Initializing...</div>
-</div>
+        <!-- Audio Presets -->
+        <h3>Audio / Personality</h3>
+        <div class="grid-2">
+            <button onclick="sendEvent('BOOT')">🔊 Boot Up</button>
+            <button onclick="sendEvent('COLLISION')">💥 Collision</button>
+            <button onclick="sendEvent('STUCK')">⚠️ Stuck</button>
+            <button onclick="sendEvent('IDLE_TOO_LONG')">💤 Bored</button>
+        </div>
 
-<script>
-    // --- CONFIGURATION ---
-    const ESP_IP = "http://192.168.4.1";
-    const UPDATE_RATE_MS = 100; // 10Hz
+        <!-- Custom Speech -->
+        <h3>Custom Voice</h3>
+        <input type="text" id="tts-input" placeholder="Enter description (e.g. 'Sarcastic hello')">
+        <button class="action" style="width:100%" onclick="sendCustomTTS()">Generative Speak</button>
 
-    // --- STATE ---
-    let driveState = { l: 0, r: 0 };
-    let lastSentState = { l: 0, r: 0 };
-    let isTouching = false;
-    let updateInterval = null;
+        <!-- Terminal -->
+        <div id="terminal">Initializing...</div>
+    </div>
 
-    // --- JOYSTICK LOGIC ---
-    const canvas = document.getElementById('joystick-canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    
-    // Pointers map: id -> {x, y, type: 'left'|'right', originY}
-    let pointers = {}; 
+    <script>
+        // --- CONFIGURATION ---
+        const ESP_IP = "http://192.168.4.1";
+        const UPDATE_RATE_MS = 100; // 10Hz
 
-    function resize() {
-        width = canvas.width = canvas.parentElement.clientWidth;
-        height = canvas.height = canvas.parentElement.clientHeight;
-        draw();
-    }
-    window.addEventListener('resize', resize);
-    resize();
+        // --- STATE ---
+        let driveState = { l: 0, r: 0 };
+        let lastSentState = { l: 0, r: 0 };
+        let isTouching = false;
+        let driveState = { l: 0, r: 0 };
+        let lastSentState = { l: 0, r: 0 };
+        let isTouching = false;
+        let updateInterval = null;
+        let pollInterval = null; // POLLING
 
-    // Touch Handlers
-    canvas.addEventListener('touchstart', e => {
-        e.preventDefault();
-        isTouching = true;
-        for (let t of e.changedTouches) {
-            const type = t.clientX < width / 2 ? 'left' : 'right';
-            pointers[t.identifier] = {
-                id: t.identifier,
-                x: t.clientX,
-                y: t.clientY,
-                originX: t.clientX,
-                originY: t.clientY,
-                type: type
-            };
+
+        // --- JOYSTICK LOGIC ---
+        const canvas = document.getElementById('joystick-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        // Pointers map: id -> {x, y, type: 'left'|'right', originY}
+        let pointers = {};
+
+        function resize() {
+            width = canvas.width = canvas.parentElement.clientWidth;
+            height = canvas.height = canvas.parentElement.clientHeight;
+            draw();
         }
-        updateDriveFromPointers();
-        draw();
-        startLoop();
-    });
+        window.addEventListener('resize', resize);
+        resize();
 
-    canvas.addEventListener('touchmove', e => {
-        e.preventDefault();
-        for (let t of e.changedTouches) {
-            if (pointers[t.identifier]) {
-                pointers[t.identifier].x = t.clientX;
-                pointers[t.identifier].y = t.clientY;
+        // Touch Handlers
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            isTouching = true;
+            for (let t of e.changedTouches) {
+                const type = t.clientX < width / 2 ? 'left' : 'right';
+                pointers[t.identifier] = {
+                    id: t.identifier,
+                    x: t.clientX,
+                    y: t.clientY,
+                    originX: t.clientX,
+                    originY: t.clientY,
+                    type: type
+                };
             }
-        }
-        updateDriveFromPointers();
-        draw();
-    });
-
-    const endTouch = e => {
-        e.preventDefault();
-        for (let t of e.changedTouches) {
-            delete pointers[t.identifier];
-        }
-        
-        // If no fingers, reset drive
-        if (Object.keys(pointers).length === 0) {
-            isTouching = false;
-            driveState = { l: 0, r: 0 };
-            stopLoop(); // Will send one final 0,0
-        } else {
             updateDriveFromPointers();
-        }
-        draw();
-    };
+            draw();
+            startLoop();
+        });
 
-    canvas.addEventListener('touchend', endTouch);
-    canvas.addEventListener('touchcancel', endTouch);
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            for (let t of e.changedTouches) {
+                if (pointers[t.identifier]) {
+                    pointers[t.identifier].x = t.clientX;
+                    pointers[t.identifier].y = t.clientY;
+                }
+            }
+            updateDriveFromPointers();
+            draw();
+        });
 
-    // Calc Logic
-    function updateDriveFromPointers() {
-        let throttle = 0;
-        let steering = 0;
-        const maxDist = height / 3; // Max throw distance in pixels
+        const endTouch = e => {
+            e.preventDefault();
+            for (let t of e.changedTouches) {
+                delete pointers[t.identifier];
+            }
 
-        for (let key in pointers) {
-            let p = pointers[key];
-            let dy = p.originY - p.y; // Up is positive
-            let dx = p.x - p.originX; // Right is positive
-
-            // Normalize -1 to 1
-            let valY = Math.max(-1, Math.min(1, dy / maxDist));
-            let valX = Math.max(-1, Math.min(1, dx / maxDist));
-
-            if (p.type === 'left') {
-                throttle = valY; // Left stick = Throttle
+            // If no fingers, reset drive
+            if (Object.keys(pointers).length === 0) {
+                isTouching = false;
+                driveState = { l: 0, r: 0 };
+                stopLoop(); // Will send one final 0,0
             } else {
-                steering = valX; // Right stick = Steering
+                updateDriveFromPointers();
+            }
+            draw();
+        };
+
+        canvas.addEventListener('touchend', endTouch);
+        canvas.addEventListener('touchcancel', endTouch);
+
+        // Calc Logic
+        function updateDriveFromPointers() {
+            let throttle = 0;
+            let steering = 0;
+            const maxDist = height / 3; // Max throw distance in pixels
+
+            for (let key in pointers) {
+                let p = pointers[key];
+                let dy = p.originY - p.y; // Up is positive
+                let dx = p.x - p.originX; // Right is positive
+
+                // Normalize -1 to 1
+                let valY = Math.max(-1, Math.min(1, dy / maxDist));
+                let valX = Math.max(-1, Math.min(1, dx / maxDist));
+
+                if (p.type === 'left') {
+                    throttle = valY; // Left stick = Throttle
+                } else {
+                    steering = valX; // Right stick = Steering
+                }
+            }
+
+            // Differential Drive Mixer
+            // Left = Throttle + Steering
+            // Right = Throttle - Steering
+            let l = throttle + steering;
+            let r = throttle - steering;
+
+            // Clamp
+            l = Math.max(-1, Math.min(1, l));
+            r = Math.max(-1, Math.min(1, r));
+
+            // Exponential Curve (for better control)
+            // Sign * Value^2
+            // l = Math.sign(l) * (l * l);
+            // r = Math.sign(r) * (r * r);
+
+            // Convert to PWM (255 max)
+            driveState.l = Math.round(l * 255);
+            driveState.r = Math.round(r * 255);
+        }
+
+        // Drawing
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Dividers
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 20);
+            ctx.lineTo(width / 2, height - 20);
+            ctx.stroke();
+
+            // Draw Joysticks
+            for (let key in pointers) {
+                let p = pointers[key];
+
+                // Base
+                ctx.beginPath();
+                ctx.arc(p.originX, p.originY, 40, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.stroke();
+
+                // Knob
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 25, 0, Math.PI * 2);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
+                ctx.fill();
+
+                // Connector
+                ctx.beginPath();
+                ctx.moveTo(p.originX, p.originY);
+                ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
+                ctx.stroke();
             }
         }
 
-        // Differential Drive Mixer
-        // Left = Throttle + Steering
-        // Right = Throttle - Steering
-        let l = throttle + steering;
-        let r = throttle - steering;
 
-        // Clamp
-        l = Math.max(-1, Math.min(1, l));
-        r = Math.max(-1, Math.min(1, r));
-
-        // Exponential Curve (for better control)
-        // Sign * Value^2
-        // l = Math.sign(l) * (l * l);
-        // r = Math.sign(r) * (r * r);
-
-        // Convert to PWM (255 max)
-        driveState.l = Math.round(l * 255);
-        driveState.r = Math.round(r * 255);
-    }
-
-    // Drawing
-    function draw() {
-        ctx.clearRect(0, 0, width, height);
-
-        // Draw Dividers
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(width/2, 20);
-        ctx.lineTo(width/2, height-20);
-        ctx.stroke();
-
-        // Draw Joysticks
-        for (let key in pointers) {
-            let p = pointers[key];
-            
-            // Base
-            ctx.beginPath();
-            ctx.arc(p.originX, p.originY, 40, 0, Math.PI*2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.stroke();
-
-            // Knob
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 25, 0, Math.PI*2);
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
-            ctx.fill();
-            
-            // Connector
-            ctx.beginPath();
-            ctx.moveTo(p.originX, p.originY);
-            ctx.lineTo(p.x, p.y);
-            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
-            ctx.stroke();
+        // --- NETWORKING ---
+        function log(msg) {
+            const term = document.getElementById('terminal');
+            term.innerText = `> ${msg}\n` + term.innerText.substring(0, 100);
         }
-    }
 
-
-    // --- NETWORKING ---
-    function log(msg) {
-        const term = document.getElementById('terminal');
-        term.innerText = `> ${msg}\n` + term.innerText.substring(0, 100);
-    }
-
-    function setStatus(connected) {
-        const el = document.getElementById('status-indicator');
-        const txt = document.getElementById('status-text');
-        if (connected) {
-            el.classList.add('connected');
-            txt.innerText = "CONNECTED";
-        } else {
-            el.classList.remove('connected');
-            txt.innerText = "DISCONNECTED";
+        function setStatus(connected) {
+            const el = document.getElementById('status-indicator');
+            const txt = document.getElementById('status-text');
+            if (connected) {
+                el.classList.add('connected');
+                txt.innerText = "CONNECTED";
+            } else {
+                el.classList.remove('connected');
+                txt.innerText = "DISCONNECTED";
+            }
         }
-    }
 
-    function startLoop() {
-        if (!updateInterval) {
-            updateInterval = setInterval(sendDrive, UPDATE_RATE_MS);
+        function startLoop() {
+            if (!updateInterval) {
+                updateInterval = setInterval(sendDrive, UPDATE_RATE_MS);
+            }
+            if (!pollInterval) {
+                pollInterval = setInterval(pollForEvents, 1000); // Check server every 1s
+            }
         }
-    }
 
-    function stopLoop() {
-        if (updateInterval) {
-            clearInterval(updateInterval);
-            updateInterval = null;
-            // Send one final stop 100ms later to be sure
-            setTimeout(sendDrive, 100);
+        function stopLoop() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+                // Send one final stop 100ms later to be sure
+                setTimeout(sendDrive, 100);
+            }
         }
-    }
 
-    async function sendDrive() {
-        // Debounce: verify change
-        // const hasChanged = (driveState.l !== lastSentState.l || driveState.r !== lastSentState.r);
-        // Actually, for UDP/Reliability, we might want to just stream it.
-        // But for HTTP POST, let's allow small delta to save network
-        
-        let shouldSend = (driveState.l !== lastSentState.l || driveState.r !== lastSentState.r);
+        async function sendDrive() {
+            // Debounce: verify change
+            // const hasChanged = (driveState.l !== lastSentState.l || driveState.r !== lastSentState.r);
+            // Actually, for UDP/Reliability, we might want to just stream it.
+            // But for HTTP POST, let's allow small delta to save network
 
-        // Heartbeat logic could go here, but keep simple
-        if (!shouldSend && !isTouching) return;
+            let shouldSend = (driveState.l !== lastSentState.l || driveState.r !== lastSentState.r);
 
-        try {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 80); // 80ms timeout
+            // Heartbeat logic could go here, but keep simple
+            if (!shouldSend && !isTouching) return;
 
-            await fetch(`${ESP_IP}/drive`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(driveState),
-                signal: controller.signal
-            });
-            clearTimeout(id);
-            
-            lastSentState = { ...driveState };
-            setStatus(true);
-            // log(`Drive: ${driveState.l}, ${driveState.r}`);
+            try {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), 80); // 80ms timeout
 
-        } catch (e) {
-            setStatus(false);
-            // Don't log every frame error to avoid lag, maybe only on status change
+                await fetch(`${ESP_IP}/drive`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(driveState),
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+
+                lastSentState = { ...driveState };
+                setStatus(true);
+                // log(`Drive: ${driveState.l}, ${driveState.r}`);
+
+            } catch (e) {
+                setStatus(false);
+                // Don't log every frame error to avoid lag, maybe only on status change
+            }
         }
-    }
 
-    async function sendStop() {
-        driveState = { l: 0, r: 0 };
-        updateDriveFromPointers(); // Reset visual math
-        pointers = {}; // Kill joysticks
-        draw();
-        
-        log("STOP COMMAND SENT");
-        if (navigator.vibrate) navigator.vibrate(200);
+        async function sendStop() {
+            driveState = { l: 0, r: 0 };
+            updateDriveFromPointers(); // Reset visual math
+            pointers = {}; // Kill joysticks
+            draw();
 
-        try {
-            await fetch(`${ESP_IP}/stop`, { method: 'POST' });
-        } catch(e) { log("Error sending STOP"); }
-    }
+            log("STOP COMMAND SENT");
+            if (navigator.vibrate) navigator.vibrate(200);
 
-    async function sendEvent(evtName) {
-        log(`Triggering: ${evtName}`);
-        if (navigator.vibrate) navigator.vibrate(50);
-        try {
-            await fetch(`${ESP_IP}/say_id`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: evtName })
-            });
-        } catch(e) { log("Failed to send event"); }
-    }
+            try {
+                await fetch(`${ESP_IP}/stop`, { method: 'POST' });
+            } catch (e) { log("Error sending STOP"); }
+        }
 
-    async function sendCustomTTS() {
-        const text = document.getElementById('tts-input').value;
-        if (!text) return;
-        
-        log(`Generating: "${text}"...`);
-        try {
-            await fetch(`${ESP_IP}/say_desc`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ desc: text })
-            });
-            document.getElementById('tts-input').value = ""; // Clear
-        } catch(e) { log("TTS Failed"); }
-    }
+        async function sendEvent(evtName) {
+            log(`Triggering: ${evtName}`);
+            if (navigator.vibrate) navigator.vibrate(50);
+            try {
+                await fetch(`${ESP_IP}/say_id`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: evtName })
+                });
+            } catch (e) { log("Failed to send event"); }
+        }
 
-</script>
+        async function sendCustomTTS() {
+            const text = document.getElementById('tts-input').value;
+            if (!text) return;
+
+            log(`Generating: "${text}"...`);
+            try {
+                await fetch(`${ESP_IP}/say_desc`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ desc: text })
+                });
+                document.getElementById('tts-input').value = ""; // Clear
+            } catch (e) { log("TTS Failed"); }
+        }
+
+        // --- POLLING LOGIC ---
+        async function pollForEvents() {
+            try {
+                const res = await fetch(`${ESP_IP}/poll_events`);
+                const data = await res.json();
+
+                // Expected Format: { "events": ["saw_human", "collision"] }
+                if (data.events && data.events.length > 0) {
+                    for (let evt of data.events) {
+                        log(`SERVER EVENT: ${evt}`);
+                        // This is where we would trigger Audio Playback
+                        // Since this is just a remote, we might just log it 
+                        // OR we can actually play audio if we have files.
+                        // The user wants Safari to PLAY audio.
+                        // So we should assume there is an audio player logic here.
+                        playClientAudio(evt);
+                    }
+                }
+            } catch (e) {
+                // failures expected if offline
+            }
+        }
+
+        function playClientAudio(evtName) {
+            // Placeholder for client-side audio
+            // In reality, we might map 'saw_human' -> 'human.mp3'
+            // For now, let's just use SpeechSynthesis as a fallback since no MP3s are loaded
+            if (window.speechSynthesis) {
+                let text = "";
+                if (evtName === "saw_human") text = "I see a human.";
+                else if (evtName === "collision") text = "Ouch. Watch it.";
+                else if (evtName === "random") text = "Bazinga!";
+                else text = evtName.replace("_", " ");
+
+                const u = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        // Auto-start polling on load
+        startLoop();
+
+    </script>
 </body>
+
 </html>
